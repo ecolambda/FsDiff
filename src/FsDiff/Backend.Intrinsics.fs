@@ -11,7 +11,7 @@ open System.Numerics
 module NativeCPU =
 
     /// High-speed SIMD-accelerated linear algebra primitives
-    module BLAS =
+    module SIMD =
 
         /// Replaces 'idamax': Finds the index of the element with the maximum absolute value.
         /// Fully optimized across CPU hardware lanes natively.
@@ -49,40 +49,40 @@ module NativeCPU =
 
                 maxIdx + 1 // BLAS uses 1-based indexing layout
 
-        /// Replaces 'daxpy': y <- alpha * x + y
+        /// y <- alpha * x + y.
+        /// In place-update, which requires the length of x and y to be equal.
         let daxpy (alpha: float, x: float[], y: float[]) : unit =
-            let len = min x.Length y.Length
+            if x.Length <> y.Length then failwith "daxpy requires vectors of equal length"
             let simdLength = Vector<float>.Count
-            let alphaVec = Vector<float>(alpha)
+            let alphaVec = Vector<float> alpha
 
             let mutable i = 0
 
-            while i <= len - simdLength do
+            while i <= x.Length - simdLength do
                 let vecX = Vector<float>(x, i)
                 let vecY = Vector<float>(y, i)
                 let resultVec = alphaVec * vecX + vecY
                 resultVec.CopyTo(y, i)
                 i <- i + simdLength
 
-            while i < len do
+            while i < x.Length do
                 y.[i] <- alpha * x.[i] + y.[i]
                 i <- i + 1
 
         /// Replaces 'dscal': x <- alpha * x
         let dscal (alpha: float, x: float[]) : unit =
-            let len = x.Length
             let simdLength = Vector<float>.Count
-            let alphaVec = Vector<float>(alpha)
+            let alphaVec = Vector<float> alpha
 
             let mutable i = 0
 
-            while i <= len - simdLength do
+            while i <= x.Length - simdLength do
                 let vecX = Vector<float>(x, i)
                 let resultVec = alphaVec * vecX
                 resultVec.CopyTo(x, i)
                 i <- i + simdLength
 
-            while i < len do
+            while i < x.Length do
                 x.[i] <- alpha * x.[i]
                 i <- i + 1
 
@@ -148,39 +148,53 @@ module NativeCPU =
     type Float64Backend() =
         interface Backend<float> with
             member _.Add_V_V(x, y) =
-                let res = Array.copy y in
-                BLAS.daxpy (1.0, x, res)
-                res
+                if x.Length = 0 then y
+                elif y.Length = 0 then x
+                else
+                    let res = Array.copy y in
+                    SIMD.daxpy (1.0, x, res)
+                    res
 
-            member _.Add_V_V_Inplace(x, y) = BLAS.daxpy (1.0, x, y)
+            member _.Add_V_V_Inplace(x, y) = SIMD.daxpy (1.0, x, y)
             member _.Add_S_V(alpha, x) = x |> Array.map (fun v -> alpha + v)
 
             member _.Mul_S_V(alpha, x) =
                 let res = Array.copy x in
-                BLAS.dscal (alpha, res)
+                SIMD.dscal (alpha, res)
                 res
 
             member _.Sub_V_V(x, y) =
                 let res = Array.copy x in
-                BLAS.daxpy (-1.0, y, res)
+                SIMD.daxpy (-1.0, y, res)
                 res
 
-            member _.Mul_Dot_V_V(x, y) = BLAS.ddot (x, y)
+            member _.Mul_Dot_V_V(x, y) = SIMD.ddot (x, y)
 
             member _.Mul_Out_V_V(x, y) =
                 Array2D.init x.Length y.Length (fun r c -> x.[r] * y.[c])
 
             member _.L1Norm_V x = x |> Array.sumBy abs
-            member _.L2Norm_V x = sqrt (BLAS.ddot (x, x))
+            member _.L2Norm_V x = sqrt (SIMD.ddot (x, x))
 
             member _.SupNorm_V x =
                 if x.Length = 0 then
                     0.0
                 else
-                    let i = BLAS.idamax (x) in abs x.[i - 1]
+                    let i = SIMD.idamax (x) in abs x.[i - 1]
 
             member _.Add_M_M(x, y) =
-                Array2D.init (Array2D.length1 x) (Array2D.length2 x) (fun r c -> x.[r, c] + y.[r, c])
+                let xl1 = Array2D.length1 x
+                let xl2 = Array2D.length2 x
+                let yl1 = Array2D.length1 y
+                let yl2 = Array2D.length2 y
+                if xl1 * xl2 = 0 then
+                    Array2D.copy y
+                elif yl1 * yl2 = 0 then
+                    Array2D.copy x
+                elif (xl1 <> yl1) || (xl2 <> yl2) then
+                    failwith "Invalid arguments in matrix multiply"
+                else
+                    Array2D.init (Array2D.length1 x) (Array2D.length2 x) (fun r c -> x.[r, c] + y.[r, c])
 
             member _.AlphaAdd_M_M_Inplace(alpha, x, y) =
                 for r in 0 .. Array2D.length1 x - 1 do
@@ -199,22 +213,22 @@ module NativeCPU =
 
             member _.Mul_M_M(x, y) =
                 let res = Array2D.zeroCreate (Array2D.length1 x) (Array2D.length2 y)
-                BLAS.dgemm (1.0, x, y, 0.0, res)
+                SIMD.dgemm (1.0, x, y, 0.0, res)
                 res
 
             member _.Mul_M_M_Add_V_MCols(x, y, z) =
                 let res = Array2D.init (Array2D.length1 x) (Array2D.length2 y) (fun r c -> z.[r])
-                BLAS.dgemm (1.0, x, y, 1.0, res)
+                SIMD.dgemm (1.0, x, y, 1.0, res)
                 res
 
             member _.Mul_M_V(x, y) =
                 let res = Array.zeroCreate (Array2D.length1 x) in
-                BLAS.dgemv (1.0, x, y, 0.0, res)
+                SIMD.dgemv (1.0, x, y, 0.0, res)
                 res
 
             member _.Mul_M_V_Add_V(x, y, z) =
                 let res = Array.copy z in
-                BLAS.dgemv (1.0, x, y, 1.0, res)
+                SIMD.dgemv (1.0, x, y, 1.0, res)
                 res
 
             member _.Mul_V_M(x, y) =

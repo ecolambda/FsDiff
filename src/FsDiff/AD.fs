@@ -4313,6 +4313,7 @@ module DiffOps =
     let grad' (f: DV -> D) x : D * DV =
         let xa = x |> makeReverse GlobalTagger.Next
         let z: D = f xa
+        reverseReset (z :> dobj)
         z |> reverseProp D.One
         (z |> primal, xa |> adjoint)
 

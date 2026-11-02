@@ -9,6 +9,7 @@
     <Compile Include="Tests.fs" />
     <Compile Include="Backend.Intrinsics.fs" />
     <Compile Include="AD.fs" />
+    <Compile Include="CaseStudies.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

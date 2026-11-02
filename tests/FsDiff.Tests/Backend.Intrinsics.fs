@@ -18,6 +18,15 @@ let vectorMathSanity =
                 let result = coreBackend.Add_V_V(x, y)
                 Expect.sequenceEqual result [| 5.0; 7.0; 9.0 |] "Vector addition arithmetic failed."
             }
+            
+            test "Adding an empty vector" {
+                let x = [||]
+                let y = [| 4.0; 5.0; 6.0 |]
+                let result = coreBackend.Add_V_V(Array.empty, y)
+                let result2 = coreBackend.Add_V_V(y, Array.empty)
+                Expect.sequenceEqual result y "Vector addition arithmetic failed."
+                Expect.sequenceEqual result2 y "Vector addition arithmetic failed."
+            }
 
             test "In-Place Vector Addition (Add_V_V_Inplace)" {
                 let x = [| 1.0; 1.0; 1.0 |]
@@ -69,10 +78,10 @@ let matrixMathSanity =
                 let b = array2D [ [ 5.0; 6.0 ]; [ 7.0; 8.0 ] ]
                 // Row 0, Col 0: 1*5 + 2*7 = 5 + 14 = 19
                 // Row 0, Col 1: 1*6 + 2*8 = 6 + 16 = 22
-                // Row 1, Col 0: 3*5 + 4*7 = 15 + 28 = 33
+                // Row 1, Col 0: 3*5 + 4*7 = 15 + 28 = 43
                 // Row 1, Col 1: 3*6 + 4*8 = 18 + 32 = 50
                 let result = coreBackend.Mul_M_M(a, b)
-                let expected = array2D [ [ 19.0; 22.0 ]; [ 33.0; 50.0 ] ]
+                let expected = array2D [ [ 19.0; 22.0 ]; [ 43.0; 50.0 ] ]
 
                 // Unroll 2D matrices into sequences to assert equality cleanly
                 let resSeq =
