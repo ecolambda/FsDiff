@@ -1,6 +1,6 @@
 ﻿// This file is part of FsDiff.
 //
-// FsDiff is derived in part from DiffSharp: Differentiable Functional Programming - https://FsDiff.github.io.
+// FsDiff is derived in part from DiffSharp: Differentiable Functional Programming - https://DiffSharp.github.io.
 //
 // Original DiffSharp copyright:
 // Copyright (c) 2016-     University of Oxford (Atilim Gunes Baydin <gunes@robots.ox.ac.uk>)
