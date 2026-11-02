@@ -18,7 +18,7 @@ let vectorMathSanity =
                 let result = coreBackend.Add_V_V(x, y)
                 Expect.sequenceEqual result [| 5.0; 7.0; 9.0 |] "Vector addition arithmetic failed."
             }
-            
+
             test "Adding an empty vector" {
                 let x = [||]
                 let y = [| 4.0; 5.0; 6.0 |]

@@ -18,60 +18,68 @@ open FsDiff.AD.Float64
 
 [<Tests>]
 let reverseAD =
-    testList "Reverse AD" [
+    testList
+        "Reverse AD"
+        [
 
-        testCase "sum" <| fun _ ->
-            let testNums = [| 1. .. 10. |] |> DV
-            let g,gV = grad' DV.sum testNums
-            let expect = Array.init 10 (fun _ -> 1.) |> DV
-            Expect.equal gV expect "Gradient should be flat ones"
+            testCase "sum"
+            <| fun _ ->
+                let testNums = [| 1. .. 10. |] |> DV
+                let g, gV = grad' DV.sum testNums
+                let expect = Array.init 10 (fun _ -> 1.) |> DV
+                Expect.equal gV expect "Gradient should be flat ones"
 
-        testCase "head" <| fun _ ->
-            let testNums = [| 1. .. 10. |] |> DV
-            let g,gV = grad' (fun x -> x.[0]) testNums
-            let expect = Array.init 9 (fun _ -> 0.) |> Array.append [| 1. |] |> DV
-            Expect.equal gV expect "Gradient should be 1 at first element and zero elsewhere"
+            testCase "head"
+            <| fun _ ->
+                let testNums = [| 1. .. 10. |] |> DV
+                let g, gV = grad' (fun x -> x.[0]) testNums
+                let expect = Array.init 9 (fun _ -> 0.) |> Array.append [| 1. |] |> DV
+                Expect.equal gV expect "Gradient should be 1 at first element and zero elsewhere"
 
-        testCase "sin" <| fun _ ->
-            let testNums = [| 1. .. 3. |] |> DV
-            let g,gV = grad' (fun x -> sin x.[0]) testNums
-            let expect = [| float <| cos testNums.[0]; 0.; 0. |] |> DV
-            Expect.equal gV expect ""
+            testCase "sin"
+            <| fun _ ->
+                let testNums = [| 1. .. 3. |] |> DV
+                let g, gV = grad' (fun x -> sin x.[0]) testNums
+                let expect = [| float <| cos testNums.[0]; 0.; 0. |] |> DV
+                Expect.equal gV expect ""
 
-        testCase "mul" <| fun _ ->
-            let testNums = [| 1. .. 3. |] |> DV
-            let g,gV = grad' (fun x -> x.[0] * x.[0]) testNums
-            let expect = [| float (testNums.[0] * 2.); 0.; 0. |] |> DV
-            Expect.equal gV expect ""
+            testCase "mul"
+            <| fun _ ->
+                let testNums = [| 1. .. 3. |] |> DV
+                let g, gV = grad' (fun x -> x.[0] * x.[0]) testNums
+                let expect = [| float (testNums.[0] * 2.); 0.; 0. |] |> DV
+                Expect.equal gV expect ""
 
-        testCase "matrix element" <| fun _ ->
-            let x0 = DV [| 0.2; 0.4; 0.6; 0.8 |]
-            let f (x: DV) =
-                let m = DM.init 2 2 (fun i j -> x.[2 * i + j])
-                sin m.[0, 0]
+            testCase "matrix element"
+            <| fun _ ->
+                let x0 = DV [| 0.2; 0.4; 0.6; 0.8 |]
 
-            let _, gradient = grad' f x0
-            let expected = [| cos 0.2; 0.; 0.; 0. |]
+                let f (x: DV) =
+                    let m = DM.init 2 2 (fun i j -> x.[2 * i + j])
+                    sin m.[0, 0]
 
-            Expect.equal (gradient |> DV.toArray |> Array.map float) expected  ""
+                let _, gradient = grad' f x0
+                let expected = [| cos 0.2; 0.; 0.; 0. |]
+
+                Expect.equal (gradient |> DV.toArray |> Array.map float) expected ""
 
 
-        test "Vector Element Summation Gradient (d/dx (sum X) = [1, 1, 1])" {
-            // f(w) = w0 + w1 + w2 -> Grad must be a flat vector of 1.0 values
-            let lossFunction (w: DV) = DV.sum w
+            test "Vector Element Summation Gradient (d/dx (sum X) = [1, 1, 1])" {
+                // f(w) = w0 + w1 + w2 -> Grad must be a flat vector of 1.0 values
+                let lossFunction (w: DV) = DV.sum w
 
-            let x0 = DV.create 3 5.5
-            let _, gradient = grad' lossFunction x0
+                let x0 = DV.create 3 5.5
+                let _, gradient = grad' lossFunction x0
 
-            let gradElements = gradient |> DV.toArray |> Array.map (fun d -> d.P)
+                let gradElements = gradient |> DV.toArray |> Array.map (fun d -> d.P)
 
-            Expect.sequenceEqual
-                (gradElements |> Array.map float)
-                [| 1.0; 1.0; 1.0 |]
-                "Vector summation gradient must return 1.0 for every active tracking element lane"
-        }
+                Expect.sequenceEqual
+                    (gradElements |> Array.map float)
+                    [| 1.0; 1.0; 1.0 |]
+                    "Vector summation gradient must return 1.0 for every active tracking element lane"
+            }
 
-    ]
+        ]
 
 [<Tests>]
 let forward =

@@ -52,7 +52,9 @@ module NativeCPU =
         /// y <- alpha * x + y.
         /// In place-update, which requires the length of x and y to be equal.
         let daxpy (alpha: float, x: float[], y: float[]) : unit =
-            if x.Length <> y.Length then failwith "daxpy requires vectors of equal length"
+            if x.Length <> y.Length then
+                failwith "daxpy requires vectors of equal length"
+
             let simdLength = Vector<float>.Count
             let alphaVec = Vector<float> alpha
 
@@ -148,8 +150,10 @@ module NativeCPU =
     type Float64Backend() =
         interface Backend<float> with
             member _.Add_V_V(x, y) =
-                if x.Length = 0 then y
-                elif y.Length = 0 then x
+                if x.Length = 0 then
+                    y
+                elif y.Length = 0 then
+                    x
                 else
                     let res = Array.copy y in
                     SIMD.daxpy (1.0, x, res)
@@ -187,6 +191,7 @@ module NativeCPU =
                 let xl2 = Array2D.length2 x
                 let yl1 = Array2D.length1 y
                 let yl2 = Array2D.length2 y
+
                 if xl1 * xl2 = 0 then
                     Array2D.copy y
                 elif yl1 * yl2 = 0 then
