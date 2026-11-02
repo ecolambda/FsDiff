@@ -37,5 +37,5 @@ jobs:
       with:
         user: ${{ secrets.NUGET_USER }}    
     - name: Publish NuGets (if this version not published before)
-      if: matrix.os == 'linux-latest'
+      if: matrix.os == 'ubuntu-latest'
       run: dotnet nuget push bin/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{steps.login.outputs.NUGET_API_KEY}} --skip-duplicate
