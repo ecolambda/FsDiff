@@ -147,8 +147,6 @@ Target.create "NuGet" (fun _ ->
             ("PackageReleaseNotes", releaseNotes)
             ("Summary", projectSummary)
             ("PackageDescription", projectDescription)
-            ("PackageIcon", "logo.png")
-            ("PackageIconUrl", iconUrl)
             ("EnableSourceLink", "true")
             ("PublishRepositoryUrl", "true")
             ("EmbedUntrackedSources", "true")
