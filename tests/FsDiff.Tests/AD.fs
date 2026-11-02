@@ -1,15 +1,15 @@
-﻿// This file is part of DiffSharp: Differentiable Functional Programming - https://diffsharp.github.io
+﻿// This file is part of DiffSharp: Differentiable Functional Programming - https://FsDiff.github.io
 // Copyright (c) 2016-     University of Oxford (Atilim Gunes Baydin <gunes@robots.ox.ac.uk>)
 // Copyright (c) 2017-     Microsoft Research, Cambridge, UK (Don Syme <dsyme@microsoft.com>)
 // Copyright (c) 2014-     National University of Ireland Maynooth (Barak A. Pearlmutter <barak@pearlmutter.net>)
 // Copyright (c) 2014-2016 National University of Ireland Maynooth (Atilim Gunes Baydin)
 // This code is licensed under the BSD license (see LICENSE file for details)
 
-module DiffSharp.Tests.AD.Float32
+module FsDiff.Tests.AD.Float32
 
 open Expecto
-open DiffSharp
-open DiffSharp.AD.Float64
+open FsDiff
+open FsDiff.AD.Float64
 
 [<Tests>]
 let scalar =

@@ -1,13 +1,13 @@
-﻿// This file is part of DiffSharp: Differentiable Functional Programming - https://diffsharp.github.io
+﻿// This file is part of DiffSharp: Differentiable Functional Programming - https://FsDiff.github.io
 // Copyright (c) 2016-     University of Oxford (Atilim Gunes Baydin <gunes@robots.ox.ac.uk>)
 // Copyright (c) 2017-     Microsoft Research, Cambridge, UK (Don Syme <dsyme@microsoft.com>)
 // Copyright (c) 2014-     National University of Ireland Maynooth (Barak A. Pearlmutter <barak@pearlmutter.net>)
 // Copyright (c) 2014-2016 National University of Ireland Maynooth (Atilim Gunes Baydin)
 // This code is licensed under the BSD license (see LICENSE file for details)
 
-namespace DiffSharp.Tests
+namespace FsDiff.Tests
 
-open DiffSharp.Util
+open FsDiff.Util
 open FsCheck
 
 
@@ -42,7 +42,7 @@ type Util() =
         else
             abs (a - b) < eps64
 
-    static member (=~)(a: DiffSharp.AD.Float64.D, b: DiffSharp.AD.Float64.D) = Util.(=~) (float a, float b)
+    static member (=~)(a: FsDiff.AD.Float64.D, b: FsDiff.AD.Float64.D) = Util.(=~) (float a, float b)
 
     static member (=~)(a: float[], b: float[]) =
         if (a.Length = 0) && (b.Length = 0) then

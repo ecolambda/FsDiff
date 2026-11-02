@@ -9,7 +9,7 @@
 // Copyright (c) 2014-2016 National University of Ireland Maynooth (Atilim Gunes Baydin)
 // This code is licensed under the BSD license (see LICENSE file for details)
 
-namespace DiffSharp.Backend
+namespace FsDiff.Backend
 
 /// Interface for DiffSharp backends
 type Backend<'T> =

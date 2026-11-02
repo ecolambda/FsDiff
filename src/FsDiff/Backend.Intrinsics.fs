@@ -1,7 +1,7 @@
 #nowarn "9"
 #nowarn "51"
 
-namespace DiffSharp.Backend
+namespace FsDiff.Backend
 
 open System
 open System.Numerics

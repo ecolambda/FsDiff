@@ -10,7 +10,7 @@
 // This code is licensed under the BSD license (see LICENSE file for details)
 
 /// Various utility functions
-module DiffSharp.Util
+module FsDiff.Util
 
 open System.Threading.Tasks
 

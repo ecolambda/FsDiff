@@ -1,6 +1,6 @@
 module IntrinsicsTests
 
-open DiffSharp.Backend
+open FsDiff.Backend
 open Expecto
 
 let coreBackend = NativeCPU.Float64Backend() :> Backend<float>

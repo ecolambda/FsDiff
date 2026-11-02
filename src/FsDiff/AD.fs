@@ -1,6 +1,6 @@
 ﻿// This file is part of FsDiff.
 //
-// FsDiff is derived in part from DiffSharp: Differentiable Functional Programming - https://diffsharp.github.io.
+// FsDiff is derived in part from DiffSharp: Differentiable Functional Programming - https://FsDiff.github.io.
 //
 // Original DiffSharp copyright:
 // Copyright (c) 2016-     University of Oxford (Atilim Gunes Baydin <gunes@robots.ox.ac.uk>)
@@ -10,12 +10,12 @@
 // This code is licensed under the BSD license (see LICENSE file for details)
 
 /// Nested forward and reverse mode automatic differentiation module
-module DiffSharp.AD.Float64
+module FsDiff.AD.Float64
 
 #nowarn "77"
 
-open DiffSharp.Util
-open DiffSharp.Config
+open FsDiff.Util
+open FsDiff.Config
 
 type number = float
 let inline Backend<'T> = GlobalConfig.Float64Backend
@@ -461,7 +461,7 @@ type D =
     static member Min(a: D, b: D) = ((a + b) - abs (a - b)) / N.two
 
     static member FixedPoint (g: D -> D -> D) (a0: D) (b: D) =
-        let imax = DiffSharp.Config.GlobalConfig.FixedPointMaxIterations
+        let imax = FsDiff.Config.GlobalConfig.FixedPointMaxIterations
         let eps = D FixedPointEpsilon
 
         let mutable a = a0
@@ -3900,7 +3900,7 @@ module DOps =
                             | LogSumExp_DV(a) -> pushRec ((bxv ((d.A / exp d.P) * exp a.P) a) :: t) // d.P = DV.LogSumExp(a.P)
                             | FixedPoint_D(b, bfirst, aprev, alast) ->
                                 // Christianson (1994)
-                                let imax = DiffSharp.Config.GlobalConfig.FixedPointMaxIterations
+                                let imax = FsDiff.Config.GlobalConfig.FixedPointMaxIterations
                                 let eps = D(FixedPointEpsilon)
 
                                 let mutable i = 0
