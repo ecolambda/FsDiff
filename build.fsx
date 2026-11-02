@@ -36,7 +36,7 @@ FsDiff supports nested forward and reverse AD up to any level. Derivative calcul
 let authors = "Atılım Güneş Baydin,Barak A. Pearlmutter, Andrew C. Martin"
 let companyName = ""
 let tags = "automatic-differentiation F# fsharp FsSci scientific-computing"
-let license = "BSD 2-Clause"
+let license = "BSD-2-Clause"
 let iconUrl = ""
 
 let copyright =
