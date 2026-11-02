@@ -1,0 +1,14 @@
+source https://www.nuget.org/api/v2/
+frameworks: auto-detect
+storage: none
+
+nuget FSharp.Core ~> 8
+nuget FSharp.Data
+nuget FSharp.Formatting
+nuget FSharp.Quotations.Evaluator
+
+group test
+    source https://www.nuget.org/api/v2/
+    storage: none
+
+    nuget Expecto.FsCheck
