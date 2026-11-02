@@ -1,0 +1,28 @@
+name: .NET
+
+on:
+  pull_request:
+    branches: [ master ] 
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, linux-latest]
+
+    steps:
+    - uses: actions/checkout@master
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 10.0.x
+    - name: Restore tool dependencies
+      run: dotnet tool restore
+    - name: Restore paket dependencies
+      run: dotnet paket restore
+    - name: Restore dependencies
+      run: dotnet restore bristlecone.sln
+    - name: Build
+      run: dotnet fsi build.fsx
