@@ -9,3 +9,4 @@ group test
     storage: none
 
     nuget Expecto.FsCheck
+    nuget Expecto.BenchmarkDotNet

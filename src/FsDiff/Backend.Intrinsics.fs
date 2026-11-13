@@ -151,11 +151,11 @@ module NativeCPU =
         interface Backend<float> with
             member _.Add_V_V(x, y) =
                 if x.Length = 0 then
-                    y
+                    Array.copy y
                 elif y.Length = 0 then
-                    x
+                    Array.copy x
                 else
-                    let res = Array.copy y in
+                    let res = Array.copy y
                     SIMD.daxpy (1.0, x, res)
                     res
 
@@ -163,16 +163,33 @@ module NativeCPU =
             member _.Add_S_V(alpha, x) = x |> Array.map (fun v -> alpha + v)
 
             member _.Mul_S_V(alpha, x) =
-                let res = Array.copy x in
+                let res = Array.copy x
                 SIMD.dscal (alpha, res)
                 res
 
-            member _.Sub_V_V(x, y) =
-                let res = Array.copy x in
-                SIMD.daxpy (-1.0, y, res)
-                res
+            member this.Sub_V_V(x, y) =
+                let xl = x.Length
+                let yl = y.Length
+                if xl = 0 then
+                    (this :> Backend<float>).Mul_S_V(-1., y)
+                elif yl = 0 then
+                    Array.copy x
+                elif xl <> yl then
+                    failwith "Incompatable dimensions: vectors of different length"
+                else
+                    let x' = Array.copy x
+                    SIMD.daxpy (-1.0, y, x')
+                    x'
 
-            member _.Mul_Dot_V_V(x, y) = SIMD.ddot (x, y)
+            member _.Mul_Dot_V_V(x, y) =
+                let xl = x.Length
+                let yl = y.Length
+                if (xl = 0) || (yl = 0) then
+                    0.
+                elif xl <> yl then
+                    failwith "Incompatable dimensions: vectors of different length"
+                else
+                    SIMD.ddot (x, y)
 
             member _.Mul_Out_V_V(x, y) =
                 Array2D.init x.Length y.Length (fun r c -> x.[r] * y.[c])
@@ -184,7 +201,8 @@ module NativeCPU =
                 if x.Length = 0 then
                     0.0
                 else
-                    let i = SIMD.idamax (x) in abs x.[i - 1]
+                    let i = SIMD.idamax (x)
+                    abs x.[i - 1]
 
             member _.Add_M_M(x, y) =
                 let xl1 = Array2D.length1 x
@@ -202,9 +220,17 @@ module NativeCPU =
                     Array2D.init (Array2D.length1 x) (Array2D.length2 x) (fun r c -> x.[r, c] + y.[r, c])
 
             member _.AlphaAdd_M_M_Inplace(alpha, x, y) =
-                for r in 0 .. Array2D.length1 x - 1 do
-                    for c in 0 .. Array2D.length2 x - 1 do
-                        y.[r, c] <- y.[r, c] + alpha * x.[r, c]
+                let xl1 = Array2D.length1 x
+                let xl2 = Array2D.length2 x
+                let yl1 = Array2D.length1 y
+                let yl2 = Array2D.length2 y
+                if xl1 * xl2 = 0 then ()
+                elif (xl1 <> yl1) || (xl2 <> yl2) then
+                    failwith "Matrix dimensions did not match"
+                else
+                    for r in 0 .. Array2D.length1 x - 1 do
+                        for c in 0 .. Array2D.length2 x - 1 do
+                            y.[r, c] <- y.[r, c] + alpha * x.[r, c]
 
             member _.Add_S_M(alpha, x) = x |> Array2D.map (fun v -> alpha + v)
 
@@ -213,8 +239,19 @@ module NativeCPU =
 
             member _.Mul_S_M(alpha, x) = x |> Array2D.map (fun v -> alpha * v)
 
-            member _.Sub_M_M(x, y) =
-                Array2D.init (Array2D.length1 x) (Array2D.length2 x) (fun r c -> x.[r, c] - y.[r, c])
+            member this.Sub_M_M(x, y) =
+                let xl1 = Array2D.length1 x
+                let xl2 = Array2D.length2 x
+                let yl1 = Array2D.length1 y
+                let yl2 = Array2D.length2 y
+                if xl1 * xl2 = 0 then
+                    (this :> Backend<float>).Mul_S_M(-1., y)
+                elif yl1 * yl2 = 0 then
+                    Array2D.copy x
+                elif (xl1 <> yl1) || (xl2 <> yl2) then
+                    failwith "Matrices had different dimensions"
+                else
+                    Array2D.init (Array2D.length1 x) (Array2D.length2 x) (fun r c -> x.[r, c] - y.[r, c])
 
             member _.Mul_M_M(x, y) =
                 let res = Array2D.zeroCreate (Array2D.length1 x) (Array2D.length2 y)
@@ -227,12 +264,12 @@ module NativeCPU =
                 res
 
             member _.Mul_M_V(x, y) =
-                let res = Array.zeroCreate (Array2D.length1 x) in
+                let res = Array.zeroCreate (Array2D.length1 x)
                 SIMD.dgemv (1.0, x, y, 0.0, res)
                 res
 
             member _.Mul_M_V_Add_V(x, y, z) =
-                let res = Array.copy z in
+                let res = Array.copy z
                 SIMD.dgemv (1.0, x, y, 1.0, res)
                 res
 
