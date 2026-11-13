@@ -62,7 +62,8 @@ type PrimalMathBenchmarks() =
 let benchConfig =
     { benchmarkConfig with diagnosers = [ BenchmarkDotNet.Diagnosers.MemoryDiagnoser(BenchmarkDotNet.Diagnosers.MemoryDiagnoserConfig()) ] }
 
-[<Tests>]
+// Uncomment below line to run benchmarks
+// [<Tests>]
 let tests =
     testList "Performance tests" [
 
