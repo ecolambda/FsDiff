@@ -170,6 +170,7 @@ module NativeCPU =
             member this.Sub_V_V(x, y) =
                 let xl = x.Length
                 let yl = y.Length
+
                 if xl = 0 then
                     (this :> Backend<float>).Mul_S_V(-1., y)
                 elif yl = 0 then
@@ -184,6 +185,7 @@ module NativeCPU =
             member _.Mul_Dot_V_V(x, y) =
                 let xl = x.Length
                 let yl = y.Length
+
                 if (xl = 0) || (yl = 0) then
                     0.
                 elif xl <> yl then
@@ -224,7 +226,9 @@ module NativeCPU =
                 let xl2 = Array2D.length2 x
                 let yl1 = Array2D.length1 y
                 let yl2 = Array2D.length2 y
-                if xl1 * xl2 = 0 then ()
+
+                if xl1 * xl2 = 0 then
+                    ()
                 elif (xl1 <> yl1) || (xl2 <> yl2) then
                     failwith "Matrix dimensions did not match"
                 else
@@ -244,6 +248,7 @@ module NativeCPU =
                 let xl2 = Array2D.length2 x
                 let yl1 = Array2D.length1 y
                 let yl2 = Array2D.length2 y
+
                 if xl1 * xl2 = 0 then
                     (this :> Backend<float>).Mul_S_M(-1., y)
                 elif yl1 * yl2 = 0 then

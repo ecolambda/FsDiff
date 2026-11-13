@@ -119,8 +119,7 @@ and [<Struct; CustomEquality; CustomComparison>] D =
             | ValueSome(DF(_, _, _)) -> failwith "Cannot set fan-out value of DF."
             | ValueSome(DR(_, _, _, f, _)) -> f.Value <- v
 
-    static member inline MkForward(d: D, t: D, ai: uint32) =
-        D(d.Value, DF(d, t, ai))
+    static member inline MkForward(d: D, t: D, ai: uint32) = D(d.Value, DF(d, t, ai))
 
     member d.GetForward(t: D, i: uint32) = D.MkForward(d, t, i)
 
@@ -165,14 +164,28 @@ and [<Struct; CustomEquality; CustomComparison>] D =
         | ValueSome(DR(_)) -> sprintf "DR % e" d'
 
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
-    static member inline Op_D_D(a: D, [<InlineIfLambda>] ff, [<InlineIfLambda>] fd, [<InlineIfLambda>] df, [<InlineIfLambda>] r) =
+    static member inline Op_D_D
+        (a: D, [<InlineIfLambda>] ff, [<InlineIfLambda>] fd, [<InlineIfLambda>] df, [<InlineIfLambda>] r)
+        =
         match a.Node with
         | ValueNone -> D(ff (a.Value))
         | ValueSome(DF(ap, at, ai)) -> let cp = fd (ap) in D.MkForward(cp, df (cp, ap, at), ai)
         | ValueSome(DR(ap, _, _, _, ai)) -> D.MkReverse(fd (ap), r (a), ai)
 
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
-    static member inline Op_D_D_D(a: D, b: D, [<InlineIfLambda>] ff, [<InlineIfLambda>] fd, [<InlineIfLambda>] df_da, [<InlineIfLambda>] df_db, [<InlineIfLambda>] df_dab, [<InlineIfLambda>] r_d_d, [<InlineIfLambda>] r_d_c, [<InlineIfLambda>] r_c_d) =
+    static member inline Op_D_D_D
+        (
+            a: D,
+            b: D,
+            [<InlineIfLambda>] ff,
+            [<InlineIfLambda>] fd,
+            [<InlineIfLambda>] df_da,
+            [<InlineIfLambda>] df_db,
+            [<InlineIfLambda>] df_dab,
+            [<InlineIfLambda>] r_d_d,
+            [<InlineIfLambda>] r_d_c,
+            [<InlineIfLambda>] r_c_d
+        ) =
         match a.Node with
         | ValueNone ->
             match b.Node with
@@ -281,28 +294,38 @@ and [<Struct; CustomEquality; CustomComparison>] D =
     // D - number binary operations
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member (+)(a: D, b: number) = a + (D b)
+
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member (-)(a: D, b: number) = a - (D b)
+
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member (*)(a: D, b: number) = a * (D b)
+
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member (/)(a: D, b: number) = a / (D b)
+
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member Pow(a: D, b: number) = a ** (D b)
+
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member Atan2(a: D, b: number) = atan2 a (D b)
 
     // number - D binary operations
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member (+)(a: number, b: D) = (D a) + b
+
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member (-)(a: number, b: D) = (D a) - b
+
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member (*)(a: number, b: D) = (D a) * b
+
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member (/)(a: number, b: D) = (D a) / b
+
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member Pow(a: number, b: D) = (D a) ** b
+
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member Atan2(a: number, b: D) = atan2 (D a) b
 
@@ -1901,7 +1924,7 @@ and DM =
                 | -1 -> let cp = fd (a, bp) in DM.R(cp, r_c_d (a, b), bi) // ai < bi
                 | _ -> let cp = fd (ap, b) in DM.R(cp, r_d_c (a, b), ai) // ai > bi
 
-    static member inline Op_DM_D_DM(a, b:D, ff, fd, df_da, df_db, df_dab, r_d_d, r_d_c, r_c_d) =
+    static member inline Op_DM_D_DM(a, b: D, ff, fd, df_da, df_db, df_dab, r_d_d, r_d_c, r_c_d) =
         match a with
         | DM(ap) ->
             match b.Node with
